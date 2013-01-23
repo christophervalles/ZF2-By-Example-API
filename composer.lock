@@ -89,7 +89,6 @@
                     "dev-develop": "2.1-dev"
                 }
             },
-            "installation-source": "dist",
             "autoload": {
                 "psr-0": {
                     "Zend\\": "library/",

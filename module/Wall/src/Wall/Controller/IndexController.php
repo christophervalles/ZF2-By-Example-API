@@ -9,13 +9,26 @@
 
 namespace Wall\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\ViewModel;
+use Zend\Mvc\Controller\AbstractRestfulController;
 
-class IndexController extends AbstractActionController
+class IndexController extends AbstractRestfulController
 {
-    public function indexAction()
+    public function get($id)
     {
-        return new ViewModel();
+        return array(
+            'id' => 1,
+            'username' => 'tbhot3ww',
+            'email' => 'tbhot3ww@gmail.com',
+            'avatar_id' => 12
+        );
+    }
+    
+    public function getList(){
+    }
+    public function create($data){
+    }
+    public function update($id, $data){
+    }
+    public function delete($id){
     }
 }

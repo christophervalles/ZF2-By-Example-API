@@ -8,18 +8,31 @@
  */
 
 return array(
+    'errors' => array(
+        'post_processor' => 'json-pp',
+        'show_exceptions' => array(
+            'message' => true,
+            'trace'   => true
+        )
+    ),
+    'di' => array(
+        'instance' => array(
+            'alias' => array(
+                'json-pp'  => 'Wall\PostProcessor\Json'
+            )
+        )
+    ),
     'router' => array(
         'routes' => array(
             'wall' => array(
                 'type' => 'Zend\Mvc\Router\Http\Segment',
                 'options' => array(
-                    'route'    => '/:username',
+                    'route'    => '/:id',
                     'constraints' => array(
-                        'username' => '\w+'
+                        'id' => '\w+'
                     ),
                     'defaults' => array(
-                        'controller' => 'Wall\Controller\Index',
-                        'action'     => 'index',
+                        'controller' => 'Wall\Controller\Index'
                     ),
                 ),
             ),
@@ -29,18 +42,5 @@ return array(
         'invokables' => array(
             'Wall\Controller\Index' => 'Wall\Controller\IndexController'
         ),
-    ),
-    'view_manager' => array(
-        'display_not_found_reason' => true,
-        'display_exceptions'       => true,
-        'doctype'                  => 'HTML5',
-        'not_found_template'       => 'error/404',
-        'exception_template'       => 'error/index',
-        'template_map' => array(
-            'wall/index/index'     => __DIR__ . '/../view/wall/index/index.phtml',
-        ),
-        'template_path_stack' => array(
-            __DIR__ . '/../view',
-        ),
-    ),
+    )
 );
