@@ -15,11 +15,18 @@ class IndexController extends AbstractRestfulController
 {
     public function get($id)
     {
+        $userTable = $this->serviceLocator->get('Wall\Model\UsersTable');
+        die(var_dump($userTable));
         return array(
             'id' => 1,
             'username' => 'tbhot3ww',
             'email' => 'tbhot3ww@gmail.com',
-            'avatar_id' => 12
+            'avatar_id' => 12,
+            'name' => 'Christopher',
+            'surname' => 'Valles',
+            'bio' => 'Game backend engineer. Entrepreneur. Airsofter. Apple fanboy. ACTC. Cooker. Sysadmin. ACSP. If you want to know more just ask!',
+            'location' => 'London, United Kingdom',
+            'gender' => 'Male'
         );
     }
     
