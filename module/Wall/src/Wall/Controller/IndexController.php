@@ -13,20 +13,15 @@ use Zend\Mvc\Controller\AbstractRestfulController;
 
 class IndexController extends AbstractRestfulController
 {
+    protected $usersTable;
+    
     public function get($id)
     {
-        $userTable = $this->serviceLocator->get('Wall\Model\UsersTable');
-        die(var_dump($userTable));
+        $usersTable = $this->getUsersTable();
+        $user = $usersTable->getById(1);
+        
         return array(
-            'id' => 1,
-            'username' => 'tbhot3ww',
-            'email' => 'tbhot3ww@gmail.com',
-            'avatar_id' => 12,
-            'name' => 'Christopher',
-            'surname' => 'Valles',
-            'bio' => 'Game backend engineer. Entrepreneur. Airsofter. Apple fanboy. ACTC. Cooker. Sysadmin. ACSP. If you want to know more just ask!',
-            'location' => 'London, United Kingdom',
-            'gender' => 'Male'
+            'user' => $user
         );
     }
     
@@ -37,5 +32,14 @@ class IndexController extends AbstractRestfulController
     public function update($id, $data){
     }
     public function delete($id){
+    }
+    
+    public function getUsersTable()
+    {
+        if (!$this->usersTable) {
+            $sm = $this->getServiceLocator();
+            $this->usersTable = $sm->get('Wall\Model\UsersTable');
+        }
+        return $this->usersTable;
     }
 }

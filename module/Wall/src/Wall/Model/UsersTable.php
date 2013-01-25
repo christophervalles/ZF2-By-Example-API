@@ -1,36 +1,26 @@
 <?php
-
 namespace Wall\Model;
 
-use Zend\Db\TableGateway\AbstractTableGateway;
-use Zend\Db\Adapter\Adapter;
+use Zend\Db\TableGateway\TableGateway;
+use Zend\Db\Sql\Select;
 
-use Zend\Db\Sql\Sql,
-    Zend\Db\Sql\Where;
-
-class UsersTable extends AbstractTableGateway
+class UsersTable
 {
-    protected $table = 'users';
+    protected $tableGateway;
     
-    public function __construct(Adapter $adapter)
+    public function __construct(TableGateway $tableGateway)
     {
-        $this->adapter = $adapter;
-        $this->initialize();
+        $this->tableGateway = $tableGateway;
     }
     
-    public function getUser($id)
+    public function getById($id)
     {
-        $sql = new Sql($this->adapter);
-        $select = $sql->select();
-        $select->from($this->table);
-        
-        $where = new  Where();
-        $where->equalTo('id', $id) ;
-        $select->where($where);
-        
-        $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
-        
-        return $result;
+        $id = (int) $id;
+        $rowset = $this->tableGateway->select(array('id' => $id));
+        $row = $rowset->current();
+        if (!$row) {
+            throw new \Exception("Could not find row $id");
+        }
+        return $row;
     }
 }

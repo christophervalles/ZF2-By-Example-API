@@ -10,6 +10,10 @@
 namespace Wall;
 
 use Zend\Mvc\MvcEvent;
+use Wall\Model\User;
+use Wall\Model\UsersTable;
+use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\TableGateway\TableGateway;
 
 class Module
 {
@@ -20,12 +24,12 @@ class Module
         $sharedEvents->attach('Zend\Mvc\Controller\AbstractRestfulController', MvcEvent::EVENT_DISPATCH, array($this, 'postProcess'), -100);
         $sharedEvents->attach('Zend\Mvc\Application', MvcEvent::EVENT_DISPATCH_ERROR, array($this, 'errorProcess'), 999);
     }
-
+    
     public function getConfig()
     {
         return include __DIR__ . '/config/module.config.php';
     }
-
+    
     public function getAutoloaderConfig()
     {
         return array(
@@ -44,23 +48,23 @@ class Module
     public function postProcess(MvcEvent $e)
     {
         $di = $e->getTarget()->getServiceLocator()->get('di');
+        
         if (is_array($e->getResult()->getVariables())) {
             $vars = $e->getResult()->getVariables();
         } else {
             $vars = null;
         }
-
-        /** @var PostProcessor\AbstractPostProcessor $postProcessor */
+        
         $postProcessor = $di->get('json-pp', array(
             'response' => $e->getResponse(),
             'vars' => $vars,
         ));
-
+        
         $postProcessor->process();
-
+        
         return $postProcessor->getResponse();
     }
-
+    
     /**
      * @param MvcEvent $e
      * @return null|\Zend\Http\PhpEnvironment\Response
@@ -70,11 +74,11 @@ class Module
         $di = $e->getApplication()->getServiceManager()->get('di');
         $eventParams = $e->getParams();
         $configuration = $e->getApplication()->getConfig();
-
+        
         $vars = array();
         if (isset($eventParams['exception'])) {
             $exception = $eventParams['exception'];
-
+            
             if ($configuration['errors']['show_exceptions']['message']) {
                 $vars['error-message'] = $exception->getMessage();
             }
@@ -82,18 +86,18 @@ class Module
                 $vars['error-trace'] = $exception->getTrace();
             }
         }
-
+        
         if (empty($vars)) {
             $vars['error'] = 'Something went wrong';
         }
-
+        
         $postProcessor = $di->get(
             $configuration['errors']['post_processor'],
             array('vars' => $vars, 'response' => $e->getResponse())
         );
-
+        
         $postProcessor->process();
-
+        
         if (
             $eventParams['error'] === \Zend\Mvc\Application::ERROR_CONTROLLER_NOT_FOUND ||
             $eventParams['error'] === \Zend\Mvc\Application::ERROR_ROUTER_NO_MATCH
@@ -102,9 +106,28 @@ class Module
         } else {
             $e->getResponse()->setStatusCode(\Zend\Http\PhpEnvironment\Response::STATUS_CODE_500);
         }
-
+        
         $e->stopPropagation();
-
+        
         return $postProcessor->getResponse();
+    }
+    
+    public function getServiceConfig()
+    {
+        return array(
+            'factories' => array(
+                'Wall\Model\UsersTable' => function($sm) {
+                    $tableGateway = $sm->get('UsersTableGateway');
+                    $table = new UsersTable($tableGateway);
+                    return $table;
+                },
+                'UsersTableGateway' => function($sm) {
+                    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+                    $resultSetPrototype = new ResultSet();
+                    $resultSetPrototype->setArrayObjectPrototype(new User());
+                    return new TableGateway('users', $dbAdapter, null, $resultSetPrototype);
+                },
+            ),
+        );
     }
 }
